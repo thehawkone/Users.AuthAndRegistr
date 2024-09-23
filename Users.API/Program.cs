@@ -43,6 +43,9 @@ builder.Services.AddDbContext<UsersDbContext>(
 
 var app = builder.Build();
 
+
+
+
 app.MapGet("/security/getMessage",
     () => "Hello World!").RequireAuthorization();
 
