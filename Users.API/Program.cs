@@ -1,4 +1,3 @@
-using System.Net.NetworkInformation;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +5,11 @@ using Microsoft.IdentityModel.Tokens;
 using Users.DataAccess;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddDbContext<UsersDbContext>(
+    options => {
+        options.UseNpgsql(builder.Configuration.GetConnectionString(nameof(UsersDbContext)));
+    });
 
 var jwtSettings = builder.Configuration.GetSection("Jwt");
 
@@ -29,22 +33,13 @@ builder.Services.AddAuthentication(options =>
     });
 
 builder.Services.AddAuthorization();
-builder.Services.AddAuthentication();
 
 //Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<UsersDbContext>(
-    options => {
-        options.UseNpgsql(builder.Configuration.GetConnectionString(nameof(UsersDbContext)));
-    });
-
 var app = builder.Build();
-
-
-
 
 app.MapGet("/security/getMessage",
     () => "Hello World!").RequireAuthorization();
@@ -61,6 +56,7 @@ app.UseRouting();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+app.UseAuthentication();
 
 app.UseEndpoints(endpoints =>
     endpoints.MapControllers());
